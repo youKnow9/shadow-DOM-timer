@@ -10,18 +10,26 @@ class CountdownTimer extends HTMLElement {
       
 	connectedCallback() {
 		this.render();
-		this.test()
+		this.test();
+		const secondsAttr = this.getAttribute('seconds');
+		const totalSeconds = parseInt(secondsAttr);
+		this.setTimer(totalSeconds);
 	}
-      
+
 	test() {
 		const startButton = document.getElementById('startButton');
-		startButton.addEventListener('click', (e) => {
-			console.log(e.target)
+  		startButton.addEventListener('click', () => {
 			if (!this.started) {
 				this.started = true;
+				const secondsAttr = this.getAttribute('seconds');
+				const seconds = parseInt(secondsAttr);
+				this.endTime = Date.now() + seconds * 1000;
+					if (this.time) {
+						this.updateTimeDisplay();
+					};
 				this.startCountDown();
-			}
-		});
+			};
+  		});
 		const pauseButton = document.getElementById('pauseButton');
 		const resetButton = document.getElementById('resetButton');
 		pauseButton.addEventListener('click', () => this.pauseCountDown());
@@ -31,28 +39,28 @@ class CountdownTimer extends HTMLElement {
 	static get observedAttributes() {
 	  	return ['seconds', 'to-time'];
 	};
-      
-	attributeChangedCallback(name, oldValue, newValue) {
-		const seconds = parseInt(newValue);
-		this.endTime = Date.now() + seconds * 1000; // вычисляем время завершения таймера 
-		console.log(this.endTime)
-		if (this.time) {
-			this.updateTimeDisplay();
-		};
-	};
 
 	render() {
 		this.shadowRoot.innerHTML = `
 		<style>
-		:host {
-			display: flex;
-			font-size: 24px;
-		}
+			:host {
+				text-align: center;
+				display: flex;
+				font-size: 30px;
+			}
 		</style>
-		<span id="timer">00:00:00</span>
-		`;
+		<span id="timer">00:00:00</span>`;
 	};
-      
+	
+	setTimer(totalSeconds) {
+		const timerElement = this.shadowRoot.getElementById('timer');
+		const hours = Math.floor(totalSeconds / 3600);
+		const minutes = Math.floor((totalSeconds % 3600) / 60);
+		const seconds = totalSeconds % 60;
+		const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+		timerElement.innerText = formattedTime;
+	};
+
 	updateTimeDisplay() {
 		const timerElement = this.shadowRoot.getElementById('timer');
 		if (timerElement) {
@@ -63,13 +71,14 @@ class CountdownTimer extends HTMLElement {
 			const hours = Math.floor(timeDifference / 3600000);
 			const minutes = Math.floor((timeDifference % 3600000) / 60000);
 			const seconds = Math.floor((timeDifference % 60000) / 1000);
-
+			console.log(minutes)
+			console.log(seconds)
 			const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 	
 			timerElement.innerText = `${formattedTime}`;
 		};
 	};
-      
+
 	startCountDown() {
 		this.time = true;
 		if (this.time) {
@@ -77,7 +86,7 @@ class CountdownTimer extends HTMLElement {
 				this.updateTimeDisplay();
 				if (this.endTime - Date.now() <= 0) {
 					clearInterval(this.int);
-					// this.dispatchEvent(new Event('endtimer'));
+					this.dispatchEndTimerEvent();
 				};
 			}, 1000);
 		};
@@ -92,41 +101,18 @@ class CountdownTimer extends HTMLElement {
 		this.time = false;
 		this.render();
 	};
+
+	dispatchEndTimerEvent() {
+		const endTimerEvent = new Event('endtimer');
+		this.dispatchEvent(endTimerEvent);
+	};
 }
 customElements.define('countdown-timer', CountdownTimer);
 
-
-// const startButton = document.createElement('button');
-// const pauseButton = document.createElement('button');
-// const resetButton = document.createElement('button');
-
-// window.addEventListener('DOMContentLoaded', () => {
-// 	const startButton = document.createElement('button');
-// 	startButton.textContent = 'Start Timer';
-
-// 	startButton.addEventListener('click', () => {
-// 		const timerElement = document.querySelector('countdown-timer');
-// 		timerElement.dispatchEvent(new CustomEvent('startTimer'));
-// 	});
-
-// 	const pauseButton = document.createElement('button');
-// 	pauseButton.textContent = 'Pause Timer';
-
-// 	pauseButton.addEventListener('click', () => {
-// 		const timerElement = document.querySelector('countdown-timer');
-// 		timerElement.dispatchEvent(new CustomEvent('pauseTimer'));
-// 	});
-
-// 	const resetButton = document.createElement('button');
-// 	resetButton.textContent = 'Reset Timer';
-
-// 	resetButton.addEventListener('click', () => {
-// 		const timerElement = document.querySelector('countdown-timer');
-// 		timerElement.dispatchEvent(new CustomEvent('resetTimer'));
-// 	});
-
-// //     // Добавляем кнопки в DOM
-// 	document.body.appendChild(startButton);
-// 	document.body.appendChild(pauseButton);
-// 	document.body.appendChild(resetButton);
-// });
+const countdownTimer = document.querySelector('countdown-timer');
+countdownTimer.addEventListener('endtimer', () => {
+	const timerElement = countdownTimer.shadowRoot.getElementById('timer');
+	if (timerElement) {
+		timerElement.innerText = 'Время!';
+	};
+});
