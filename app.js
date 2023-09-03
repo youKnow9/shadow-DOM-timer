@@ -6,10 +6,26 @@ class CountdownTimer extends HTMLElement {
 		this.time = false;
 		this.int = null;
 		this.started = false;
+		this.firstStartButtonPress = true;
 	}
       
 	connectedCallback() {
 		this.render();
+		if (this.firstStartButtonPress) {
+			this.addEventListener('starttimer', () => {
+			    if (!this.started) {
+				this.started = true;
+				const secondsAttr = this.getAttribute('seconds');
+				const seconds = parseInt(secondsAttr);
+				this.endTime = Date.now() + seconds * 1000;
+				if (this.time) {
+				    this.updateTimeDisplay();
+				};
+				this.startCountDown();
+			    };
+			});
+		    }
+		
 		this.test();
 		const secondsAttr = this.getAttribute('seconds');
 		const totalSeconds = parseInt(secondsAttr);
@@ -17,41 +33,24 @@ class CountdownTimer extends HTMLElement {
 	}
 
 	test() {
-<<<<<<< HEAD
 		this.addEventListener('starttimer', () => {
-=======
 		const startButton = document.getElementById('startButton');
   		startButton.addEventListener('click', () => {
->>>>>>> 67ec90dd11e733e56ae4eed34d5bc7d1cdff5766
-			if (!this.started) {
-				this.started = true;
-				const secondsAttr = this.getAttribute('seconds');
-				const seconds = parseInt(secondsAttr);
-				this.endTime = Date.now() + seconds * 1000;
-					if (this.time) {
-						this.updateTimeDisplay();
-					};
-				this.startCountDown();
-			};
   		});
-<<<<<<< HEAD
 		this.addEventListener('pausetimer', () => this.pauseCountdown());
     		this.addEventListener('resettimer', () => this.resetCountdown());
-=======
 		const pauseButton = document.getElementById('pauseButton');
 		const resetButton = document.getElementById('resetButton');
 		pauseButton.addEventListener('click', () => this.pauseCountDown());
 		resetButton.addEventListener('click', () => this.resetCountDown());
->>>>>>> 67ec90dd11e733e56ae4eed34d5bc7d1cdff5766
-	};
-      
+	});
+}
 	static get observedAttributes() {
-	  	return ['seconds', 'to-time'];
-	};
+		return ['seconds', 'to-time'];
+      	};
 
 	render() {
-		this.shadowRoot.innerHTML = `
-		<style>
+		this.shadowRoot.innerHTML = `<style>
 			:host {
 				text-align: center;
 				display: flex;
@@ -63,15 +62,12 @@ class CountdownTimer extends HTMLElement {
 	
 	setTimer(totalSeconds) {
 		const timerElement = this.shadowRoot.getElementById('timer');
+		if (!timerElement) return;
 		const hours = Math.floor(totalSeconds / 3600);
 		const minutes = Math.floor((totalSeconds % 3600) / 60);
 		const seconds = totalSeconds % 60;
 		const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-<<<<<<< HEAD
-		timerElement.innerText = `${formattedTime}`;
-=======
 		timerElement.innerText = formattedTime;
->>>>>>> 67ec90dd11e733e56ae4eed34d5bc7d1cdff5766
 	};
 
 	updateTimeDisplay() {
@@ -82,11 +78,8 @@ class CountdownTimer extends HTMLElement {
 			const hours = Math.floor(timeDifference / 3600000);
 			const minutes = Math.floor((timeDifference % 3600000) / 60000);
 			const seconds = Math.floor((timeDifference % 60000) / 1000);
-<<<<<<< HEAD
-=======
 			console.log(minutes)
 			console.log(seconds)
->>>>>>> 67ec90dd11e733e56ae4eed34d5bc7d1cdff5766
 			const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 			timerElement.innerText = `${formattedTime}`;
 		};
@@ -116,7 +109,6 @@ class CountdownTimer extends HTMLElement {
 	};
 
 	dispatchEndTimerEvent() {
-<<<<<<< HEAD
 		const endTimerEvent = new Event('endtimer', { bubbles: true });
     		this.dispatchEvent(endTimerEvent);
 	};
@@ -130,13 +122,10 @@ class CountdownTimer extends HTMLElement {
 				this.updateTimeDisplay();
 			};
 		};
-	};
 	
-=======
 		const endTimerEvent = new Event('endtimer');
 		this.dispatchEvent(endTimerEvent);
 	};
->>>>>>> 67ec90dd11e733e56ae4eed34d5bc7d1cdff5766
 }
 customElements.define('countdown-timer', CountdownTimer);
 
@@ -146,7 +135,6 @@ countdownTimer.addEventListener('endtimer', () => {
 	if (timerElement) {
 		timerElement.innerText = 'Время!';
 	};
-<<<<<<< HEAD
 });
 
 const startButton = document.getElementById('startButton');
@@ -168,6 +156,4 @@ resetButton.textContent = 'Reset Timer';
 resetButton.addEventListener('click', () => {
 	const timerElement = document.querySelector('countdown-timer');
 	timerElement.dispatchEvent(new CustomEvent('resettimer'));
-=======
->>>>>>> 67ec90dd11e733e56ae4eed34d5bc7d1cdff5766
 });
